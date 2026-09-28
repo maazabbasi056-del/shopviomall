@@ -1,138 +1,817 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShopVioMall - Global Multi-Vendor Crypto Marketplace</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cloudflare.com">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#142851">
+  <title>ShopVioMall — Global Marketplace</title>
+  <style>
+    :root {
+      --navy: #142851;
+      --navy-deep: #0b1732;
+      --blue: #253f75;
+      --orange: #ff9b08;
+      --orange-hover: #ffae2d;
+      --ink: #202b40;
+      --muted: #748095;
+      --line: #e5e9f0;
+      --paper: #fff;
+      --canvas: #f5f7fa;
+      --shadow: 0 10px 30px rgba(15, 31, 62, .09);
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: var(--canvas);
+    }
+    * { box-sizing: border-box; }
+    body { min-width: 320px; margin: 0; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    a { color: inherit; }
+    [hidden] { display: none !important; }
+    .wrap { width: min(1440px, calc(100% - 48px)); margin-inline: auto; }
+
+    .announcement {
+      min-height: 29px; display: flex; align-items: center; justify-content: center;
+      padding: 5px 12px; color: #e0e8f5; background: var(--navy-deep);
+      font-size: 11px; text-align: center;
+    }
+    .announcement a { color: var(--orange); font-weight: 800; text-decoration: none; }
+    .site-header { position: sticky; top: 0; z-index: 30; color: white; background: var(--navy); box-shadow: 0 4px 18px #0b17322e; }
+    .header-inner { min-height: 76px; display: flex; align-items: center; gap: 14px; }
+    .brand { display: flex; flex: 0 0 auto; align-items: center; gap: 9px; color: white; text-decoration: none; }
+    .brand-mark {
+      width: 41px; height: 41px; display: grid; place-items: center; border-radius: 12px;
+      color: var(--navy); background: var(--orange); font-size: 22px; font-weight: 950;
+      box-shadow: 0 5px 17px #ff990044;
+    }
+    .brand-name { color: white; font-size: 21px; font-weight: 800; letter-spacing: -.055em; white-space: nowrap; }
+    .brand-name span { color: var(--orange); }
+    .brand-caption { display: block; margin-top: 1px; color: #bec9dd; font-size: 8px; font-weight: 800; letter-spacing: .24em; }
+    .delivery { display: flex; flex: 0 0 auto; align-items: center; gap: 7px; color: #d4dceb; font-size: 10px; }
+    .delivery b { display: block; color: white; font-size: 12px; }
+    .nav-button {
+      display: inline-flex; min-height: 39px; flex: 0 0 auto; align-items: center; justify-content: center;
+      gap: 7px; padding: 0 12px; border: 1px solid #ffffff48; border-radius: 7px;
+      color: white; background: transparent; font-size: 11px; font-weight: 750;
+    }
+    .nav-button:hover, .header-action:hover { color: var(--orange); }
+    .nav-button.primary { border-color: var(--orange); color: var(--navy-deep); background: var(--orange); }
+    .nav-button.primary:hover { color: var(--navy-deep); background: var(--orange-hover); }
+    .search-form { display: flex; height: 42px; min-width: 100px; flex: 1; overflow: hidden; border-radius: 7px; background: white; }
+    .search-form input { width: 100%; min-width: 0; padding: 0 13px; border: 0; outline: 0; color: var(--ink); }
+    .search-form button { width: 50px; flex: 0 0 auto; border: 0; color: var(--navy); background: var(--orange); font-size: 19px; }
+    .header-select { max-width: 108px; min-height: 36px; border: 0; color: white; background: var(--navy); font-size: 11px; font-weight: 700; }
+    .header-select option { color: var(--ink); background: white; }
+    .header-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 12px; }
+    .header-action { padding: 5px 0; border: 0; color: white; background: transparent; font-size: 12px; font-weight: 750; white-space: nowrap; }
+    .mobile-menu { display: none; }
+    .mega-menu {
+      position: absolute; top: 100%; left: 0; width: 100%; max-height: 76vh; overflow: auto;
+      padding: 22px max(24px, calc((100vw - 1360px) / 2)); color: var(--ink);
+      border-top: 1px solid var(--line); background: white; box-shadow: 0 20px 36px #10204424;
+    }
+    .mega-grid { display: grid; grid-template-columns: repeat(5, minmax(140px, 1fr)); gap: 18px 22px; }
+    .mega-group h3 { margin: 0 0 8px; padding-bottom: 8px; border-bottom: 1px solid var(--line); font-size: 12px; }
+    .mega-group button { display: block; width: 100%; padding: 5px 0; border: 0; color: var(--muted); background: transparent; text-align: left; font-size: 11px; }
+    .mega-group button:hover { color: #a85f00; }
+
+    .hero-layout { display: grid; grid-template-columns: minmax(0, 3fr) minmax(260px, .9fr); gap: 14px; margin-block: 20px 18px; }
+    .hero {
+      position: relative; min-height: 350px; display: flex; align-items: center; justify-content: space-between;
+      gap: 22px; overflow: hidden; padding: clamp(25px, 5vw, 62px); border-radius: 13px;
+      color: white; background: linear-gradient(108deg, #101b37 2%, #263c70 58%, #bd593d);
+      box-shadow: var(--shadow);
+    }
+    .hero::after { position: absolute; inset: 0; content: ""; pointer-events: none; background: radial-gradient(circle at 74% 32%, #fff2, transparent 28%); }
+    .hero-copy, .hero-visual { position: relative; z-index: 1; }
+    .hero-copy { max-width: 510px; }
+    .hero-kicker { display: inline-block; margin-bottom: 15px; padding: 7px 11px; border: 1px solid #ffffff55; border-radius: 30px; background: #ffffff16; font-size: 10px; font-weight: 800; letter-spacing: .1em; }
+    .hero h1 { margin: 0 0 12px; font: 800 clamp(32px, 4.2vw, 52px)/1.05 Georgia, serif; }
+    .hero p { max-width: 440px; margin: 0; color: #e1e8f3; font-size: 14px; line-height: 1.7; }
+    .button {
+      display: inline-flex; min-height: 41px; align-items: center; justify-content: center; gap: 8px;
+      padding: 0 16px; border: 0; border-radius: 7px; color: var(--navy); background: var(--orange);
+      font-weight: 800; transition: .18s ease;
+    }
+    .button:hover { transform: translateY(-1px); background: var(--orange-hover); box-shadow: 0 7px 17px #ff990044; }
+    .button:disabled { cursor: wait; opacity: .65; transform: none; }
+    .button-dark { color: white; background: var(--navy); }
+    .button-outline { border: 1px solid var(--line); color: var(--navy); background: white; }
+    .hero .button { margin-top: 20px; }
+    .hero-visual { width: min(36%, 285px); height: 235px; flex: 0 0 auto; }
+    .hero-visual img { width: 100%; height: 100%; border: 4px solid #ffffff70; border-radius: 15px; object-fit: cover; transform: rotate(3deg); box-shadow: 0 18px 40px #0005; }
+    .hero-tag { position: absolute; top: 10px; left: -12px; padding: 7px 10px; border-radius: 4px; color: var(--navy); background: var(--orange); font-size: 9px; font-weight: 900; }
+    .hero-controls { position: absolute; right: 18px; bottom: 15px; z-index: 2; display: flex; gap: 7px; }
+    .hero-controls button { width: 33px; height: 33px; border: 1px solid #ffffff70; border-radius: 50%; color: white; background: #ffffff20; }
+    .deals { overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: white; box-shadow: var(--shadow); }
+    .deals-heading { display: flex; justify-content: space-between; padding: 14px; color: white; background: var(--navy); font-size: 13px; font-weight: 800; }
+    .deals-heading a { color: var(--orange); text-decoration: none; }
+    .deal { display: grid; grid-template-columns: 65px 1fr; gap: 10px; align-items: center; padding: 11px; border-bottom: 1px solid var(--line); }
+    .deal img { width: 65px; height: 58px; border-radius: 6px; object-fit: cover; }
+    .deal strong { display: -webkit-box; overflow: hidden; font-size: 11px; line-height: 1.4; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+    .deal span { display: block; margin-top: 5px; color: var(--muted); font-size: 11px; }
+
+    .section { padding: 20px 0; }
+    .trust-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .trust-card { display: flex; min-height: 96px; align-items: center; gap: 12px; padding: 14px; border: 1px solid var(--line); border-radius: 9px; background: white; }
+    .trust-icon { display: grid; width: 43px; height: 43px; flex: 0 0 auto; place-items: center; border-radius: 10px; color: var(--orange); background: var(--navy); font-size: 20px; }
+    .trust-card strong { display: block; margin-bottom: 5px; font-size: 12px; }
+    .trust-card span { color: var(--muted); font-size: 10px; line-height: 1.45; }
+    .catalog-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 17px; }
+    .catalog-heading h2 { margin: 0; font-size: 23px; }
+    .catalog-count { color: var(--muted); font-size: 11px; }
+    .product-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 21px 16px; }
+    .product-card { min-width: 0; overflow: hidden; border: 1px solid #e9edf3; border-radius: 9px; background: white; transition: transform .2s, box-shadow .2s; }
+    .product-card:hover { transform: translateY(-3px); box-shadow: 0 12px 27px #101a3520; }
+    .product-image { position: relative; overflow: hidden; aspect-ratio: 1.25 / 1; background: #eceff4; }
+    .product-image img { width: 100%; height: 100%; object-fit: cover; transition: transform .25s; }
+    .product-card:hover .product-image img { transform: scale(1.04); }
+    .product-tag { position: absolute; top: 9px; left: 9px; padding: 5px 8px; border-radius: 4px; color: var(--navy); background: var(--orange); font-size: 9px; font-weight: 900; text-transform: uppercase; }
+    .product-info { padding: 11px; }
+    .product-category { color: var(--muted); font-size: 10px; }
+    .product-title { display: -webkit-box; min-height: 38px; overflow: hidden; margin: 5px 0 0; font-size: 13px; line-height: 1.45; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+    .rating { margin: 8px 0; color: #e9950c; font-size: 12px; }
+    .rating span { color: var(--muted); }
+    .product-bottom { display: flex; align-items: center; justify-content: space-between; gap: 7px; }
+    .price { color: var(--ink); font-size: 16px; font-weight: 900; }
+    .price small { margin-left: 3px; color: var(--muted); font-size: 9px; font-weight: 600; }
+    .buy-button { min-height: 32px; padding: 0 10px; border: 0; border-radius: 5px; color: var(--navy); background: #ffad27; font-size: 10px; font-weight: 800; }
+    .buy-button:hover { background: var(--orange); }
+    .seller-banner { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-block: 30px; padding: 25px 28px; border-radius: 11px; color: white; background: linear-gradient(105deg, var(--navy-deep), #2a4278); }
+    .seller-banner h2 { margin: 0 0 7px; font: 700 23px Georgia, serif; }
+    .seller-banner p { margin: 0; color: #d3dced; font-size: 12px; }
+    .footer { padding: 35px 0 18px; color: #e0e6f0; background: #0a1228; }
+    .footer-grid { display: grid; grid-template-columns: 1.5fr repeat(4, 1fr); gap: 26px; }
+    .footer h3 { margin: 0 0 12px; color: white; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+    .footer p, .footer a { color: #acb7ca; font-size: 11px; line-height: 1.7; }
+    .footer a { display: block; margin: 5px 0; text-decoration: none; }
+    .footer a:hover { color: var(--orange); }
+    .socials { display: flex; gap: 8px; margin-top: 13px; }
+    .socials a { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 7px; color: white; background: #1b2948; font-weight: 800; }
+    .footer-bottom { display: flex; justify-content: space-between; gap: 12px; margin-top: 26px; padding-top: 13px; border-top: 1px solid #ffffff20; color: #8490a7; font-size: 10px; }
+
+    .modal[hidden] { display: none !important; }
+    .modal { position: fixed; z-index: 60; inset: 0; display: grid; place-items: center; overflow: auto; padding: 18px; background: #071025bd; }
+    .dialog { position: relative; width: min(100%, 470px); max-height: 90vh; overflow: auto; padding: 26px; border-radius: 13px; background: white; box-shadow: 0 24px 75px #0005; }
+    .dialog.wide { width: min(100%, 550px); }
+    .dialog h2 { margin: 0 38px 7px 0; color: var(--navy); font-size: 22px; }
+    .dialog-subtitle { margin: 0 0 18px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .dialog-close { position: absolute; top: 12px; right: 13px; width: 34px; height: 34px; border: 0; border-radius: 50%; color: var(--ink); background: #f0f2f6; font-size: 21px; }
+    .form-stack { display: grid; gap: 12px; }
+    .form-stack label { display: grid; gap: 6px; color: var(--ink); font-size: 11px; font-weight: 700; }
+    .form-stack input, .form-stack textarea {
+      width: 100%; min-height: 41px; padding: 10px 11px; border: 1px solid #dce2eb; border-radius: 7px; outline: none; background: white;
+    }
+    .form-stack textarea { min-height: 80px; resize: vertical; }
+    .form-stack input:focus, .form-stack textarea:focus { border-color: #516c9e; box-shadow: 0 0 0 3px #24417a16; }
+    .form-message { min-height: 16px; margin: 9px 0 0; color: #a43535; font-size: 11px; }
+    .form-message.success { color: #167646; }
+    .auth-switch { margin: 14px 0 0; color: var(--muted); font-size: 11px; text-align: center; }
+    .text-button { padding: 0; border: 0; color: #244b8d; background: transparent; font-weight: 800; }
+    .step-label { margin: 14px 0 17px; color: var(--muted); font-size: 11px; font-weight: 700; }
+    .notice { padding: 11px; border-radius: 7px; color: #63511e; background: #fff7df; font-size: 10px; line-height: 1.5; }
+    .invoice-row { display: flex; justify-content: space-between; gap: 10px; padding: 13px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+    .timer { margin: 16px 0; padding: 14px; border-radius: 9px; color: white; background: var(--navy); text-align: center; }
+    .timer span { display: block; color: #cad4e5; font-size: 10px; }
+    .timer strong { display: block; margin-top: 5px; color: var(--orange); font-size: 28px; font-variant-numeric: tabular-nums; }
+    .empty-state { grid-column: 1 / -1; padding: 32px; color: var(--muted); text-align: center; }
+
+    @media (max-width: 1150px) {
+      .header-inner { gap: 9px; }
+      .delivery { display: none; }
+      .header-select { max-width: 91px; }
+      .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .hero-layout { grid-template-columns: 1fr; }
+      .deals-items { display: grid; grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 780px) {
+      .wrap { width: calc(100% - 30px); }
+      .header-inner { min-height: 66px; flex-wrap: wrap; padding-block: 8px; }
+      .brand-name { font-size: 19px; }
+      .header-select { display: none; }
+      .mobile-menu { display: inline-flex; }
+      .header-categories { display: none; }
+      .search-form { order: 5; flex-basis: 100%; }
+      .header-actions { margin-left: auto; gap: 9px; }
+      .header-action { font-size: 10px; }
+      .mega-grid { grid-template-columns: repeat(3, minmax(125px, 1fr)); }
+      .hero { min-height: 315px; padding: 27px; }
+      .hero-visual { width: 32%; height: 165px; }
+      .trust-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 520px) {
+      .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px 10px; }
+      .product-info { padding: 9px; }
+      .product-title { font-size: 12px; }
+      .buy-button { padding-inline: 7px; }
+      .hero { min-height: 320px; align-items: flex-start; padding: 24px; }
+      .hero-copy { max-width: 95%; }
+      .hero h1 { max-width: 330px; font-size: 35px; }
+      .hero p { max-width: 270px; }
+      .hero-visual { position: absolute; right: 17px; bottom: 20px; width: 34%; height: 120px; opacity: .72; }
+      .deals-items { grid-template-columns: 1fr; }
+      .trust-grid { gap: 8px; }
+      .trust-card { align-items: flex-start; flex-direction: column; padding: 11px; }
+      .trust-icon { width: 37px; height: 37px; }
+      .seller-banner { align-items: flex-start; flex-direction: column; padding: 21px; }
+      .footer-bottom { flex-direction: column; }
+      .catalog-heading h2 { font-size: 19px; }
+      .mega-menu { padding: 18px 15px; }
+      .mega-grid { grid-template-columns: repeat(2, minmax(120px, 1fr)); gap: 15px; }
+    }
+  </style>
 </head>
 <body>
+  <div class="announcement">Discover independent finds &nbsp;·&nbsp; <a href="#seller-cta">Start selling on ShopVioMall →</a></div>
 
-    <!-- Header Navigation -->
-    <header class="navbar">
-        <div class="logo">
-            <i class="fa-solid fa-layer-group brand-icon"></i>
-            <span>ShopVio<span class="logo-accent">Mall</span></span>
-        </div>
-        <nav class="nav-links">
-            <a href="#" class="active">Marketplace</a>
-            <a href="#">Explore Shops</a>
-            <a href="#">SaaS Automation</a>
-            <a href="#">Pricing</a>
-        </nav>
-        <div class="nav-buttons">
-            <span class="crypto-badge"><i class="fa-brands fa-bitcoin"></i> Crypto Active</span>
-            <button class="btn btn-secondary">Open Shop</button>
-            <button class="btn btn-primary">Sign In</button>
-        </div>
-    </header>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="#" aria-label="ShopVioMall home">
+        <span class="brand-mark">S</span>
+        <span><span class="brand-name">Shop<span>Vio</span>Mall</span><span class="brand-caption">GLOBAL MARKETPLACE</span></span>
+      </a>
+      <div class="delivery"><span aria-hidden="true">📍</span><span>Deliver to<b>Pakistan</b></span></div>
+      <button id="categories-toggle" class="nav-button header-categories" type="button" aria-expanded="false" aria-controls="all-categories">☰&nbsp; All Categories</button>
+      <button id="mobile-categories-toggle" class="nav-button primary mobile-menu" type="button" aria-expanded="false" aria-controls="all-categories" aria-label="Open categories">☰</button>
 
-    <!-- Global Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <div class="tagline"><i class="fa-solid fa-bolt"></i> Inspired by LeadVio Business SaaS</div>
-            <h1>The Global Multi-Vendor <span class="gradient-text">Crypto Marketplace</span></h1>
-            <p>Launch your automated digital storefront in minutes. Sell products globally, manage vendors seamlessly, and accept instant borderless cryptocurrency deposits and withdrawals.</p>
-            <div class="hero-actions">
-                <button class="btn btn-primary btn-lg">Deploy Your Storefront</button>
-                <button class="btn btn-outline btn-lg"><i class="fa-solid fa-play"></i> Watch Platform Demo</button>
-            </div>
-            <div class="crypto-supported">
-                <span>Accepted Networks:</span>
-                <span class="coin"><i class="fa-brands fa-bitcoin text-btc"></i> BTC</span>
-                <span class="coin"><i class="fa-brands fa-ethereum text-eth"></i> ETH</span>
-                <span class="coin"><i class="fa-solid fa-dollar-sign text-usdt"></i> USDT (TRC20)</span>
-            </div>
+      <form id="search-form" class="search-form" role="search">
+        <input id="search-input" type="search" placeholder="Search products, brands, sellers..." aria-label="Search products">
+        <button type="submit" aria-label="Search">⌕</button>
+      </form>
+
+      <select id="language-select" class="header-select" aria-label="Choose language">
+        <option value="en">🇬🇧 English</option>
+        <option value="es">🇪🇸 Español</option>
+        <option value="zh">🇨🇳 中文</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="ar">🇸🇦 العربية</option>
+        <option value="ur">🇵🇰 اردو</option>
+      </select>
+      <select id="currency-select" class="header-select" aria-label="Choose currency">
+        <option value="USD">USD ($)</option>
+        <option value="EUR">EUR (€)</option>
+        <option value="GBP">GBP (£)</option>
+        <option value="USDT">USDT (₮)</option>
+      </select>
+      <div class="header-actions">
+        <button id="login-open" class="header-action" type="button">Log in</button>
+        <button id="register-open" class="header-action" type="button">Create account</button>
+        <button id="account-open" class="header-action" type="button" hidden>Account</button>
+      </div>
+    </div>
+    <nav id="all-categories" class="mega-menu" aria-label="All marketplace categories" hidden>
+      <div id="mega-grid" class="wrap mega-grid"></div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="wrap hero-layout" aria-label="Marketplace highlights">
+      <div class="hero">
+        <div class="hero-copy">
+          <span id="hero-kicker" class="hero-kicker">● CURATED DISCOVERIES</span>
+          <h1 id="hero-title">Discover your next digital advantage.</h1>
+          <p id="hero-description">Explore useful finds, thoughtful products, and independent sellers from one easy-to-browse marketplace.</p>
+          <button class="button" type="button" data-scroll-products>Explore the marketplace&nbsp; →</button>
         </div>
+        <div class="hero-visual">
+          <span id="hero-tag" class="hero-tag">TRENDING FINDS</span>
+          <img id="hero-image" src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&amp;fit=crop&amp;w=700&amp;q=85" alt="Featured marketplace products">
+        </div>
+        <div class="hero-controls">
+          <button id="hero-prev" type="button" aria-label="Previous promotion">‹</button>
+          <button id="hero-next" type="button" aria-label="Next promotion">›</button>
+        </div>
+      </div>
+      <aside class="deals" aria-label="Trending products">
+        <div class="deals-heading"><span>✦ Trending finds</span><a href="#products">VIEW ALL →</a></div>
+        <div id="deals-items" class="deals-items"></div>
+      </aside>
     </section>
 
-    <!-- Marketplace Main Showcase -->
-    <section class="marketplace-showcase">
-        <div class="section-header">
-            <h2>Featured Global Stores</h2>
-            <p>Explore verified vendors processing borderless automated transactions instantly.</p>
-        </div>
-
-        <div class="vendor-grid">
-            <!-- Vendor Card 1 -->
-            <div class="vendor-card">
-                <div class="vendor-banner" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6);"></div>
-                <div class="vendor-profile">
-                    <div class="vendor-avatar"><i class="fa-solid fa-microchip"></i></div>
-                    <div class="vendor-info">
-                        <h3>Nexus Tech Automation</h3>
-                        <p class="vendor-category">SaaS & Electronics</p>
-                    </div>
-                </div>
-                <p class="vendor-description">Premium automated developer plugins, SaaS keys, and global tech hardware fulfillment.</p>
-                <div class="vendor-footer">
-                    <span class="vendor-rating"><i class="fa-solid fa-star"></i> 4.9 (142 sales)</span>
-                    <span class="vendor-status status-online">● Active</span>
-                </div>
-            </div>
-
-            <!-- Vendor Card 2 -->
-            <div class="vendor-card">
-                <div class="vendor-banner" style="background: linear-gradient(135deg, #111827, #10b981);"></div>
-                <div class="vendor-profile">
-                    <div class="vendor-avatar"><i class="fa-solid fa-palette"></i></div>
-                    <div class="vendor-info">
-                        <h3>Apex Digital Assets</h3>
-                        <p class="vendor-category">Templates & Graphics</p>
-                    </div>
-                </div>
-                <p class="vendor-description">Premium UI kits, website dashboard wireframes, and design components ready to deploy.</p>
-                <div class="vendor-footer">
-                    <span class="vendor-rating"><i class="fa-solid fa-star"></i> 4.8 (89 sales)</span>
-                    <span class="vendor-status status-online">● Active</span>
-                </div>
-            </div>
-
-            <!-- Vendor Card 3 -->
-            <div class="vendor-card">
-                <div class="vendor-banner" style="background: linear-gradient(135deg, #7c3aed, #db2777);"></div>
-                <div class="vendor-profile">
-                    <div class="vendor-avatar"><i class="fa-solid fa-shirt"></i></div>
-                    <div class="vendor-info">
-                        <h3>Vio Apparel Global</h3>
-                        <p class="vendor-category">E-Commerce Goods</p>
-                    </div>
-                </div>
-                <p class="vendor-description">High-end streetwear shipping worldwide with automated dropshipping tracking layers.</p>
-                <div class="vendor-footer">
-                    <span class="vendor-rating"><i class="fa-solid fa-star"></i> 5.0 (310 sales)</span>
-                    <span class="vendor-status status-online">● Active</span>
-                </div>
-            </div>
-        </div>
+    <section class="wrap section" aria-label="Marketplace services">
+      <div class="trust-grid">
+        <article class="trust-card"><span class="trust-icon">⌖</span><div><strong>Worldwide Shipping</strong><span>Delivery information is provided with each listing.</span></div></article>
+        <article class="trust-card"><span class="trust-icon">↻</span><div><strong>Free 30-Day Returns</strong><span>Review each seller’s return terms before ordering.</span></div></article>
+        <article class="trust-card"><span class="trust-icon">◇</span><div><strong>Verified Business Sellers</strong><span>Review available seller details before purchase.</span></div></article>
+        <article class="trust-card"><span class="trust-icon">▣</span><div><strong>Encrypted Transactions</strong><span>Payment options and terms are shown at checkout.</span></div></article>
+      </div>
     </section>
 
-    <!-- Platform Control Statistics -->
-    <section class="platform-stats">
-        <div class="stat-box">
-            <h3 class="stat-number">$2.4M+</h3>
-            <p class="stat-label">Volume Processed</p>
-        </div>
-        <div class="stat-box">
-            <h3 class="stat-number">14,200+</h3>
-            <p class="stat-label">Global Shops Live</p>
-        </div>
-        <div class="stat-box">
-            <h3 class="stat-number">&lt; 3 Sec</h3>
-            <p class="stat-label">Crypto Payout Speed</p>
-        </div>
+    <section id="products" class="wrap section" aria-labelledby="products-heading">
+      <div class="catalog-heading">
+        <h2 id="products-heading">All products on ShopVioMall</h2>
+        <span id="catalog-count" class="catalog-count"></span>
+      </div>
+      <div id="product-grid" class="product-grid" aria-live="polite"></div>
     </section>
 
-    <!-- Footer -->
-    <footer class="main-footer">
-        <div class="footer-bottom">
-            <p>&copy; 2026 ShopVioMall Platform. Powered by automated SaaS infrastructure architectures.</p>
-            <div class="footer-security">
-                <span><i class="fa-solid fa-shield-halved"></i> Secured Escrow Contracts Active</span>
-            </div>
-        </div>
-    </footer>
+    <section id="seller-cta" class="wrap seller-banner">
+      <div><h2>Start selling on ShopVioMall today</h2><p>Set up your seller profile and introduce your products to new customers.</p></div>
+      <button id="seller-cta-button" class="button" type="button">Become a seller&nbsp; →</button>
+    </section>
+  </main>
 
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <section>
+          <div class="brand-name">Shop<span>Vio</span>Mall</div>
+          <p>Discover marketplace finds and connect with independent sellers.</p>
+          <div class="socials" aria-label="Social media"><a href="#" aria-label="Instagram">◎</a><a href="#" aria-label="X">𝕏</a><a href="#" aria-label="YouTube">▶</a><a href="#" aria-label="TikTok">♪</a></div>
+        </section>
+        <section><h3>Marketplace</h3><a href="#products">All products</a><a href="#all-categories">Browse categories</a><a href="#products">Trending finds</a></section>
+        <section><h3>Help & Support</h3><a href="mailto:support@shopviomall.example">Contact us</a><a href="#products">Returns & refunds</a><a href="#seller-cta">About ShopVioMall</a></section>
+        <section><h3>Sell on ShopVioMall</h3><a href="#seller-cta" data-open-seller>Become a seller</a><a href="#seller-cta" data-open-seller>Seller setup</a><a href="#seller-cta" data-open-seller>How it works</a></section>
+        <section><h3>Your Account</h3><a href="#" data-open-login>Log in</a><a href="#" data-open-register>Create account</a><a href="#" data-open-login>Account</a></section>
+      </div>
+      <div class="footer-bottom"><span>© 2026 ShopVioMall. Product details are provided by sellers.</span><span>Privacy&nbsp; · &nbsp;Terms&nbsp; · &nbsp;Seller policies</span></div>
+    </div>
+  </footer>
+
+  <div id="auth-modal" class="modal" hidden>
+    <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+      <button class="dialog-close" type="button" data-close="auth-modal" aria-label="Close">×</button>
+      <h2 id="auth-title">Welcome to ShopVioMall</h2>
+      <p id="auth-subtitle" class="dialog-subtitle">Log in to continue to your account.</p>
+      <form id="login-form" class="form-stack">
+        <label>Email address<input name="email" type="email" autocomplete="email" required></label>
+        <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+        <button class="button button-dark" type="submit">Log in</button>
+      </form>
+      <form id="register-form" class="form-stack" hidden>
+        <label>Your name<input name="name" type="text" autocomplete="name" minlength="2" maxlength="120" required></label>
+        <label>Email address<input name="email" type="email" autocomplete="email" required></label>
+        <label>Password<input name="password" type="password" autocomplete="new-password" minlength="8" required></label>
+        <button class="button button-dark" type="submit">Create account</button>
+      </form>
+      <p id="auth-message" class="form-message" role="status" aria-live="polite"></p>
+      <p class="auth-switch"><span id="auth-switch-copy">New to ShopVioMall?</span> <button id="auth-switch-button" class="text-button" type="button">Create an account</button></p>
+    </section>
+  </div>
+
+  <div id="dashboard-modal" class="modal" hidden>
+    <section class="dialog wide" role="dialog" aria-modal="true" aria-labelledby="vendor-title">
+      <button class="dialog-close" type="button" data-close="dashboard-modal" aria-label="Close">×</button>
+      <h2 id="vendor-title">Seller profile setup</h2>
+      <p class="dialog-subtitle">Complete your store details to continue seller onboarding.</p>
+      <div id="vendor-step-label" class="step-label">Step 2 of 3 · Shop setup</div>
+      <form id="vendor-form" class="form-stack">
+        <div id="vendor-step-2" class="form-stack">
+          <label>Store name<input name="shopName" type="text" maxlength="120" required></label>
+          <label>Store bio<textarea name="shopBio" maxlength="1000" required></textarea></label>
+          <button id="vendor-next" class="button" type="button">Continue to Step 3</button>
+        </div>
+        <div id="vendor-step-3" class="form-stack" hidden>
+          <label>6-digit transaction password<input name="transactionPassword" type="password" inputmode="numeric" autocomplete="new-password" pattern="[0-9]{6}" minlength="6" maxlength="6" required></label>
+          <p class="notice">Demo only: the transaction password is not stored or sent to the server.</p>
+          <button class="button" type="submit">Complete seller setup</button>
+          <button id="vendor-back" class="button button-outline" type="button">Back to shop setup</button>
+        </div>
+      </form>
+      <p id="vendor-message" class="form-message" role="status" aria-live="polite"></p>
+    </section>
+  </div>
+
+  <div id="checkout-modal" class="modal" hidden>
+    <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
+      <button class="dialog-close" type="button" data-close="checkout-modal" aria-label="Close">×</button>
+      <h2 id="checkout-title">Checkout preview</h2>
+      <p class="dialog-subtitle">Review the selected listing and its displayed price.</p>
+      <div class="invoice-row"><span id="checkout-product-name"></span><strong id="checkout-product-price"></strong></div>
+      <div class="timer"><span>Demo checkout session ends in</span><strong id="checkout-timer">10:00</strong></div>
+      <p id="checkout-status" class="notice">Preview only. No crypto invoice is issued and no payment is initiated.</p>
+      <button id="checkout-close" class="button button-dark" type="button">Close preview</button>
+    </section>
+  </div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const API_BASE = "http://127.0.0.1:5000/api";
+      const categories = [
+        ["Women Clothing & Fashion", "👗", ["Dresses", "Tops & Blouses", "Shoes", "Accessories"]],
+        ["Men Clothing & Fashion", "🧥", ["Shirts & Polos", "Pants & Jeans", "Outerwear", "Shoes"]],
+        ["Computer & Accessories", "💻", ["Laptops", "Desktops", "Monitors", "Keyboards & Mice"]],
+        ["Phone & Phone Accessories", "📱", ["Phone Cases", "Chargers & Cables", "Power Banks", "Headphones"]],
+        ["Kids & Toys", "🧸", ["Educational Toys", "Action Figures", "Dolls", "Building Blocks"]],
+        ["Sports & Outdoor", "🚴", ["Fitness Equipment", "Camping", "Cycling", "Team Sports"]],
+        ["Automobile & Motorcycle", "🚘", ["Car Accessories", "Motorcycle Gear", "Lighting", "Care & Tools"]],
+        ["Jewelry & Watches", "⌚", ["Necklaces", "Earrings", "Watches", "Bracelets"]],
+        ["Home Improvement & Tools", "🛠️", ["Power Tools", "Hand Tools", "Lighting", "Hardware"]],
+        ["Home Decoration", "🛋️", ["Living Room", "Bedroom", "Rugs", "Lighting"]],
+        ["Beauty & Personal Care", "✿", ["Haircare", "Fragrances", "Body Care", "Personal Care"]],
+        ["Skincare & Cosmetics", "🧴", ["Cleansers", "Serums", "Makeup", "Sunscreen"]],
+        ["Health, Wellness & Vitamins", "♡", ["Wellness Devices", "Vitamins", "Fitness", "Health Monitors"]],
+        ["Consumer Electronics", "🎧", ["Audio", "Cameras", "Smart Home", "Accessories"]],
+        ["Office Electronics & Furniture", "🖨️", ["Office Furniture", "Printers", "Desk Accessories", "Supplies"]],
+        ["Groceries & Pet Supplies", "🐾", ["Pantry", "Pet Food", "Pet Care", "Household"]],
+        ["Luggage & Travel Gear", "🧳", ["Luggage", "Backpacks", "Travel Accessories", "Organizers"]],
+        ["Digital Gift Cards & Vouchers", "🎁", ["Digital Gifts", "Shopping Cards", "Vouchers", "Experiences"]],
+        ["Streaming & Software Keys", "▶️", ["Software", "Streaming Offers", "Productivity", "Utilities"]],
+        ["Premium Game Accounts", "🎮", ["Gaming Services", "Game Accessories", "Digital Goods", "PC Gaming"]],
+        ["Cloud Web Hosting Panels", "☁️", ["Hosting", "Domains", "Cloud Tools", "Web Services"]],
+        ["AI Writing & SEO Bundles", "✍️", ["Writing Tools", "SEO Resources", "Templates", "Creator Tools"]],
+        ["Social Media Boost Kits", "✦", ["Creator Resources", "Social Templates", "Analytics", "Marketing Tools"]]
+      ].map(([name, icon, sub]) => ({ name, icon, sub }));
+
+      const products = [
+        { id: "lamp", title: "Time Capsule Table Lamp", category: "Home Decoration", price: 150, rating: 4.8, tag: "Featured", image: "photo-1507473885765-e6ed057f782c" },
+        { id: "necklace", title: "925 Sterling Silver Vintage Necklace", category: "Jewelry & Watches", price: 44, rating: 4.8, tag: "Popular", image: "photo-1611652022419-a9419f74343d" },
+        { id: "polo", title: "Stand-Up Collar Men's Polo", category: "Men Clothing & Fashion", price: 10, rating: 4.6, tag: "New arrival", image: "photo-1618354691373-d851c5c3a990" },
+        { id: "sandbox", title: '47" Covered Round Sandbox', category: "Kids & Toys", price: 153, rating: 4.8, tag: "Family pick", image: "photo-1599629954294-14df9ec9a967" },
+        { id: "rug", title: "One Hundred Dollar Bill Area Rug", category: "Home Decoration", price: 45, rating: 4.7, tag: "Trending", image: "photo-1600166898405-da9535204843" },
+        { id: "controller", title: "Gaming Controller with Cooling Fan", category: "Computer & Accessories", price: 13, rating: 4.7, tag: "Gamer favorite", image: "photo-1593305841991-05c297ba4575" },
+        { id: "motorbike", title: "24V Twist-Grip Electric Motorbike", category: "Automobile & Motorcycle", price: 374, rating: 4.8, tag: "Top rated", image: "photo-1558981806-ec527fa84c39" },
+        { id: "armchair", title: "Chenille Swivel Armchair (3-Pc Set)", category: "Home Decoration", price: 776, rating: 4.9, tag: "Home edit", image: "photo-1567538096630-e0c55bd6374c" },
+        { id: "charger", title: "Magnetic Watch Wireless Charger Dock", category: "Phone & Phone Accessories", price: 9, rating: 4.6, tag: "Smart pick", image: "photo-1572569511254-d8f925fe2cbb" },
+        { id: "bench", title: "Adjustable Gym Bench Equipment", category: "Sports & Outdoor", price: 199, rating: 4.7, tag: "Fitness pick", image: "photo-1534438327276-14e5300c3a48" },
+        { id: "cabinet", title: "Modern LED Glass Display Cabinet", category: "Home Improvement & Tools", price: 223, rating: 4.8, tag: "Featured", image: "photo-1600210492486-724fe5c67fb0" },
+        { id: "streaming", title: "Premium Streaming UHD 12-Month Access Key", category: "Streaming & Software Keys", price: 89, rating: 4.8, tag: "Digital listing", image: "photo-1593359677879-a4bb92f829d1" }
+      ];
+
+      const promotions = [
+        { kicker: "● CURATED DISCOVERIES", title: "Discover your next digital advantage.", description: "Explore useful finds, thoughtful products, and independent sellers from one easy-to-browse marketplace.", tag: "TRENDING FINDS", image: "photo-1490481651871-ab68de25d43d" },
+        { kicker: "● HOME & LIVING", title: "Find a fresh favorite for your space.", description: "Browse home accents, practical tools, and everyday products from marketplace sellers.", tag: "HOME EDIT", image: "photo-1600210492486-724fe5c67fb0" },
+        { kicker: "● TECH DISCOVERIES", title: "Make more of your everyday tech.", description: "Explore electronics and accessories offered by independent marketplace sellers.", tag: "TECH PICKS", image: "photo-1498049794561-7780e7231661" }
+      ];
+
+      const currencyRates = { USD: 1, EUR: 0.92, GBP: 0.79, USDT: 1 };
+      const currencySymbols = { USD: "$", EUR: "€", GBP: "£", USDT: "₮" };
+      const state = { category: "All", query: "", currency: "USD", token: "", user: null, timer: null, secondsLeft: 600 };
+      const $ = (selector) => document.querySelector(selector);
+      const escapeHTML = (value) => String(value ?? "").replace(/[&<>"']/g, (char) =>
+        ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]
+      );
+      const imageURL = (id, width = 600) =>
+        `https://images.unsplash.com/${encodeURIComponent(id)}?auto=format&fit=crop&w=${width}&q=82`;
+
+      function formatPrice(usd) {
+        const value = Number(usd) * currencyRates[state.currency];
+        return `${currencySymbols[state.currency]}${value.toFixed(2)}`;
+      }
+
+      function renderCategories() {
+        $("#mega-grid").innerHTML = categories.map((category) => `
+          <section class="mega-group">
+            <h3><button type="button" data-mega-category="${escapeHTML(category.name)}">${escapeHTML(category.name)}</button></h3>
+            ${category.sub.map((sub) => `<button type="button" data-mega-category="${escapeHTML(category.name)}">${escapeHTML(sub)}</button>`).join("")}
+          </section>
+        `).join("");
+      }
+
+      function renderProducts() {
+        const matching = products.filter((product) => {
+          const categoryMatch = state.category === "All" || product.category === state.category;
+          const searchable = `${product.title} ${product.category}`.toLowerCase();
+          return categoryMatch && searchable.includes(state.query);
+        });
+
+        $("#catalog-count").textContent = `${matching.length} products · Prices in ${state.currency}`;
+        $("#product-grid").innerHTML = matching.length ? matching.map((product) => `
+          <article class="product-card">
+            <div class="product-image">
+              <img src="${imageURL(product.image)}" alt="${escapeHTML(product.title)}" loading="lazy">
+              <span class="product-tag">${escapeHTML(product.tag)}</span>
+            </div>
+            <div class="product-info">
+              <span class="product-category">${escapeHTML(product.category)}</span>
+              <h3 class="product-title">${escapeHTML(product.title)}</h3>
+              <div class="rating" aria-label="Rated ${product.rating.toFixed(1)} out of 5">★ <span>${product.rating.toFixed(1)}</span></div>
+              <div class="product-bottom">
+                <span class="price">${formatPrice(product.price)}<small>${escapeHTML(state.currency)}</small></span>
+                <button class="buy-button" type="button" data-buy="${escapeHTML(product.id)}">Buy Now</button>
+              </div>
+            </div>
+          </article>
+        `).join("") : `<p class="empty-state">No products match your search. Try another search term.</p>`;
+      }
+
+      function renderDeals() {
+        $("#deals-items").innerHTML = [products[0], products[3], products[6]].map((product) => `
+          <article class="deal">
+            <img src="${imageURL(product.image, 180)}" alt="" loading="lazy">
+            <div><strong>${escapeHTML(product.title)}</strong><span>★ ${product.rating.toFixed(1)} &nbsp; <b>${formatPrice(product.price)}</b></span></div>
+          </article>
+        `).join("");
+      }
+
+      let promotionIndex = 0;
+      function showPromotion(index) {
+        promotionIndex = (index + promotions.length) % promotions.length;
+        const item = promotions[promotionIndex];
+        $("#hero-kicker").textContent = item.kicker;
+        $("#hero-title").textContent = item.title;
+        $("#hero-description").textContent = item.description;
+        $("#hero-tag").textContent = item.tag;
+        $("#hero-image").src = imageURL(item.image, 700);
+        $("#hero-image").alt = item.title;
+      }
+
+      function openModal(id) {
+        const modal = document.getElementById(id);
+        if (modal) modal.hidden = false;
+      }
+      function closeModal(id) {
+        const modal = document.getElementById(id);
+        if (modal) modal.hidden = true;
+      }
+      function setAuthMode(mode) {
+        const registering = mode === "register";
+        $("#login-form").hidden = registering;
+        $("#register-form").hidden = !registering;
+        $("#auth-title").textContent = registering ? "Create your account" : "Welcome back";
+        $("#auth-subtitle").textContent = registering ? "Join ShopVioMall to explore the marketplace." : "Log in to continue to your account.";
+        $("#auth-switch-copy").textContent = registering ? "Already have an account?" : "New to ShopVioMall?";
+        $("#auth-switch-button").textContent = registering ? "Log in" : "Create an account";
+        $("#auth-message").textContent = "";
+        $("#auth-message").classList.remove("success");
+        openModal("auth-modal");
+      }
+
+      async function readResponse(response) {
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || result.success === false) {
+          throw new Error(result.message || `Request failed (${response.status}).`);
+        }
+        return result;
+      }
+
+      $("#login-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const submit = form.querySelector('[type="submit"]');
+        const message = $("#auth-message");
+        submit.disabled = true;
+        message.textContent = "";
+        try {
+          const response = await fetch(`${API_BASE}/auth/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: form.elements.email.value.trim(),
+              password: form.elements.password.value
+            })
+          });
+          const result = await readResponse(response);
+          if (!result.token || !result.user) throw new Error("The server response did not include a valid session.");
+          state.token = result.token;
+          state.user = result.user;
+          form.reset();
+          closeModal("auth-modal");
+          $("#login-open").hidden = true;
+          $("#register-open").hidden = true;
+          $("#account-open").hidden = false;
+        } catch (error) {
+          message.textContent = error.message || "Unable to log in.";
+        } finally {
+          submit.disabled = false;
+        }
+      });
+
+      $("#register-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const submit = form.querySelector('[type="submit"]');
+        const message = $("#auth-message");
+        submit.disabled = true;
+        message.textContent = "";
+        try {
+          const response = await fetch(`${API_BASE}/auth/register`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: form.elements.name.value.trim(),
+              email: form.elements.email.value.trim(),
+              password: form.elements.password.value
+            })
+          });
+          const result = await readResponse(response);
+          form.reset();
+          if (result.token && result.user) {
+            state.token = result.token;
+            state.user = result.user;
+            closeModal("auth-modal");
+            $("#login-open").hidden = true;
+            $("#register-open").hidden = true;
+            $("#account-open").hidden = false;
+          } else {
+            setAuthMode("login");
+            $("#auth-message").textContent = "Account created. Please log in.";
+            $("#auth-message").classList.add("success");
+          }
+        } catch (error) {
+          message.textContent = error.message || "Unable to create account.";
+        } finally {
+          submit.disabled = false;
+        }
+      });
+
+      $("#login-open").addEventListener("click", () => setAuthMode("login"));
+      $("#register-open").addEventListener("click", () => setAuthMode("register"));
+      $("#auth-switch-button").addEventListener("click", () =>
+        setAuthMode($("#register-form").hidden ? "register" : "login")
+      );
+
+      function openSellerSetup() {
+        if (!state.token) {
+          setAuthMode("login");
+          $("#auth-message").textContent = "Log in before opening seller setup.";
+          return;
+        }
+        $("#vendor-form").reset();
+        $("#vendor-step-2").hidden = false;
+        $("#vendor-step-3").hidden = true;
+        $("#vendor-step-label").textContent = "Step 2 of 3 · Shop setup";
+        $("#vendor-message").textContent = "";
+        openModal("dashboard-modal");
+      }
+      $("#seller-cta-button").addEventListener("click", openSellerSetup);
+      $("#account-open").addEventListener("click", openSellerSetup);
+      document.querySelectorAll("[data-open-seller]").forEach((link) =>
+        link.addEventListener("click", (event) => { event.preventDefault(); openSellerSetup(); })
+      );
+      document.querySelectorAll("[data-open-login]").forEach((link) =>
+        link.addEventListener("click", (event) => { event.preventDefault(); setAuthMode("login"); })
+      );
+      document.querySelectorAll("[data-open-register]").forEach((link) =>
+        link.addEventListener("click", (event) => { event.preventDefault(); setAuthMode("register"); })
+      );
+
+      $("#vendor-next").addEventListener("click", () => {
+        const form = $("#vendor-form");
+        if (!form.elements.shopName.reportValidity() || !form.elements.shopBio.reportValidity()) return;
+        $("#vendor-step-2").hidden = true;
+        $("#vendor-step-3").hidden = false;
+        $("#vendor-step-label").textContent = "Step 3 of 3 · Transaction password";
+      });
+      $("#vendor-back").addEventListener("click", () => {
+        $("#vendor-step-2").hidden = false;
+        $("#vendor-step-3").hidden = true;
+        $("#vendor-step-label").textContent = "Step 2 of 3 · Shop setup";
+      });
+      $("#vendor-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const submit = form.querySelector('#vendor-step-3 [type="submit"]');
+        const message = $("#vendor-message");
+        if (!state.token) {
+          message.textContent = "Log in before completing seller setup.";
+          return;
+        }
+        if (!/^\d{6}$/.test(form.elements.transactionPassword.value)) {
+          message.textContent = "Enter a 6-digit transaction password.";
+          return;
+        }
+        submit.disabled = true;
+        message.textContent = "";
+        try {
+          const response = await fetch(`${API_BASE}/auth/onboard-vendor`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${state.token}` },
+            body: JSON.stringify({
+              shopName: form.elements.shopName.value.trim(),
+              shopBio: form.elements.shopBio.value.trim()
+            })
+          });
+          await readResponse(response);
+          closeModal("dashboard-modal");
+        } catch (error) {
+          message.textContent = error.message || "Unable to save seller profile.";
+        } finally {
+          submit.disabled = false;
+        }
+      });
+
+      function stopCheckoutTimer() {
+        if (state.timer) {
+          clearInterval(state.timer);
+          state.timer = null;
+        }
+      }
+      function updateCheckoutTimer() {
+        const minutes = Math.floor(state.secondsLeft / 60);
+        const seconds = state.secondsLeft % 60;
+        $("#checkout-timer").textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+        if (state.secondsLeft <= 0) {
+          stopCheckoutTimer();
+          $("#checkout-status").textContent = "This preview expired. No invoice or payment was created.";
+        }
+      }
+      function openCheckout(product) {
+        stopCheckoutTimer();
+        state.secondsLeft = 600;
+        $("#checkout-product-name").textContent = product.title;
+        $("#checkout-product-price").textContent = `${formatPrice(product.price)} ${state.currency}`;
+        $("#checkout-status").textContent = "Preview only. No crypto invoice is issued and no payment is initiated.";
+        updateCheckoutTimer();
+        openModal("checkout-modal");
+        state.timer = setInterval(() => {
+          state.secondsLeft -= 1;
+          updateCheckoutTimer();
+        }, 1000);
+      }
+
+      $("#product-grid").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-buy]");
+        if (!button) return;
+        const product = products.find((item) => item.id === button.dataset.buy);
+        if (product) openCheckout(product);
+      });
+      $("#checkout-close").addEventListener("click", () => {
+        stopCheckoutTimer();
+        closeModal("checkout-modal");
+      });
+
+      $("#search-form").addEventListener("submit", (event) => {
+        event.preventDefault();
+        state.query = $("#search-input").value.trim().toLowerCase();
+        renderProducts();
+        $("#products").scrollIntoView({ behavior: "smooth" });
+      });
+      $("#search-input").addEventListener("input", () => {
+        state.query = $("#search-input").value.trim().toLowerCase();
+        renderProducts();
+      });
+      $("#currency-select").addEventListener("change", (event) => {
+        state.currency = event.target.value;
+        renderProducts();
+        renderDeals();
+      });
+      $("#language-select").addEventListener("change", (event) => {
+        document.documentElement.lang = event.target.value;
+      });
+
+      function selectCategory(name) {
+        state.category = name;
+        state.query = "";
+        $("#search-input").value = "";
+        renderProducts();
+        $("#products").scrollIntoView({ behavior: "smooth" });
+        $("#all-categories").hidden = true;
+        $("#categories-toggle").setAttribute("aria-expanded", "false");
+        $("#mobile-categories-toggle").setAttribute("aria-expanded", "false");
+      }
+      $("#mega-grid").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-mega-category]");
+        if (button) selectCategory(button.dataset.megaCategory);
+      });
+
+      function toggleCategories() {
+        const menu = $("#all-categories");
+        menu.hidden = !menu.hidden;
+        const expanded = String(!menu.hidden);
+        $("#categories-toggle").setAttribute("aria-expanded", expanded);
+        $("#mobile-categories-toggle").setAttribute("aria-expanded", expanded);
+      }
+      $("#categories-toggle").addEventListener("click", toggleCategories);
+      $("#mobile-categories-toggle").addEventListener("click", toggleCategories);
+      document.addEventListener("click", (event) => {
+        if (!$("#all-categories").hidden &&
+            !$("#all-categories").contains(event.target) &&
+            !$("#categories-toggle").contains(event.target) &&
+            !$("#mobile-categories-toggle").contains(event.target)) {
+          $("#all-categories").hidden = true;
+          $("#categories-toggle").setAttribute("aria-expanded", "false");
+          $("#mobile-categories-toggle").setAttribute("aria-expanded", "false");
+        }
+      });
+
+      document.querySelectorAll("[data-scroll-products]").forEach((button) =>
+        button.addEventListener("click", () => $("#products").scrollIntoView({ behavior: "smooth" }))
+      );
+      document.querySelectorAll("[data-close]").forEach((button) => {
+        button.addEventListener("click", () => {
+          if (button.dataset.close === "checkout-modal") stopCheckoutTimer();
+          closeModal(button.dataset.close);
+        });
+      });
+      document.querySelectorAll(".modal").forEach((modal) => {
+        modal.addEventListener("click", (event) => {
+          if (event.target === modal) {
+            if (modal.id === "checkout-modal") stopCheckoutTimer();
+            modal.hidden = true;
+          }
+        });
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          document.querySelectorAll(".modal").forEach((modal) => { modal.hidden = true; });
+          $("#all-categories").hidden = true;
+          $("#categories-toggle").setAttribute("aria-expanded", "false");
+          $("#mobile-categories-toggle").setAttribute("aria-expanded", "false");
+          stopCheckoutTimer();
+        }
+      });
+
+      $("#hero-prev").addEventListener("click", () => showPromotion(promotionIndex - 1));
+      $("#hero-next").addEventListener("click", () => showPromotion(promotionIndex + 1));
+
+      renderCategories();
+      renderProducts();
+      renderDeals();
+    })();
+  </script>
 </body>
 </html>
