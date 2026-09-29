@@ -1,18 +1,11 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const mongoose = require("mongoose");
 const User = require("../models/User");
+const { requireAuth, requireDatabase } = require("../middleware/auth");
+const JWT_SECRET = require("../config/jwt");
 
 const router = express.Router();
-
-const JWT_SECRET =
-  process.env.JWT_SECRET ||
-  (process.env.NODE_ENV === "production" ? null : "shopviomall_secret_key");
-
-if (!JWT_SECRET) {
-  throw new Error("JWT_SECRET must be configured in production.");
-}
 
 function createSessionToken(user) {
   return jwt.sign(
@@ -29,8 +22,10 @@ function authResponse(user, token) {
     user: {
       id: String(user._id),
       name: user.name,
-      email: user.email,
+      email: user.email || "",
+      username: user.username || "",
       role: user.role || "customer",
+      accountStatus: user.role === "vendor" ? user.accountStatus : undefined,
       shopName: user.shopName || "",
       shopBio: user.shopBio || "",
       walletAddress: user.walletAddress || ""
@@ -38,38 +33,7 @@ function authResponse(user, token) {
   };
 }
 
-async function requireAuth(req, res, next) {
-  const authorization = req.get("authorization") || "";
-  const token = authorization.startsWith("Bearer ")
-    ? authorization.slice(7).trim()
-    : "";
-
-  if (!token) {
-    return res.status(401).json({ success: false, message: "Authentication required." });
-  }
-
-  try {
-    const payload = jwt.verify(token, JWT_SECRET);
-    if (!payload.sub || !mongoose.isValidObjectId(payload.sub)) {
-      return res.status(401).json({ success: false, message: "Invalid session." });
-    }
-
-    const user = await User.findById(payload.sub).select("-password");
-    if (!user) {
-      return res.status(401).json({ success: false, message: "Account not found." });
-    }
-
-    req.user = user;
-    next();
-  } catch (error) {
-    if (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError") {
-      return res.status(401).json({ success: false, message: "Invalid or expired session." });
-    }
-    next(error);
-  }
-}
-
-router.post("/register", async (req, res) => {
+router.post("/register", requireDatabase, async (req, res) => {
   try {
     const { name, email, password } = req.body || {};
 
@@ -111,7 +75,7 @@ router.post("/register", async (req, res) => {
       });
     }
 
-    console.error("Registration error:", error);
+    console.error("Registration failed:", error.name || "Error");
     return res.status(500).json({
       success: false,
       message: "Registration failed. Please try again."
@@ -119,18 +83,23 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", requireDatabase, async (req, res) => {
   try {
-    const { email, password } = req.body || {};
+    const { email, username, identifier, password } = req.body || {};
+    const loginIdentifier = typeof identifier === "string" ? identifier.trim() :
+      (typeof username === "string" ? username.trim() : (typeof email === "string" ? email.trim() : ""));
 
-    if (typeof email !== "string" || typeof password !== "string") {
+    if (!loginIdentifier || typeof password !== "string") {
       return res.status(400).json({
         success: false,
-        message: "Email and password are required."
+        message: "Email or admin username and password are required."
       });
     }
 
-    const user = await User.findOne({ email: email.trim().toLowerCase() })
+    const lookup = loginIdentifier.includes("@")
+      ? { email: loginIdentifier.toLowerCase() }
+      : { username: loginIdentifier.toLowerCase(), role: "admin" };
+    const user = await User.findOne(lookup)
       .select("+password");
 
     if (!user || typeof user.password !== "string" ||
@@ -143,7 +112,7 @@ router.post("/login", async (req, res) => {
 
     return res.json(authResponse(user, createSessionToken(user)));
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("Login failed:", error.name || "Error");
     return res.status(500).json({
       success: false,
       message: "Login failed. Please try again."
@@ -151,8 +120,11 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.post("/onboard-vendor", requireAuth, async (req, res) => {
+router.post("/onboard-vendor", requireDatabase, requireAuth, async (req, res) => {
   try {
+    if (req.user.role !== "vendor" && req.user.role !== "admin") {
+      return res.status(403).json({ success: false, message: "Seller access is granted only after Admin Central approves your seller application." });
+    }
     const { shopName, shopBio, walletAddress = "" } = req.body || {};
 
     if (
@@ -186,7 +158,7 @@ router.post("/onboard-vendor", requireAuth, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("Vendor onboarding error:", error);
+    console.error("Vendor onboarding failed:", error.name || "Error");
     return res.status(500).json({
       success: false,
       message: "Store setup failed. Please try again."
@@ -194,13 +166,14 @@ router.post("/onboard-vendor", requireAuth, async (req, res) => {
   }
 });
 
-router.get("/me", requireAuth, (req, res) => {
+router.get("/me", requireDatabase, requireAuth, (req, res) => {
   res.json({
     success: true,
     user: {
       id: String(req.user._id),
       name: req.user.name,
-      email: req.user.email,
+      email: req.user.email || "",
+      username: req.user.username || "",
       role: req.user.role || "customer",
       shopName: req.user.shopName || "",
       shopBio: req.user.shopBio || "",
