@@ -8,6 +8,7 @@
     "test:browser:smoke": "node scripts/browser-smoke.js",
     "test:a11y": "node scripts/accessibility-scan.js",
     "start": "node server.js",
+    "monitor:production": "node scripts/monitor-production.js",
     "setup:admin": "node scripts/setup-admin.js",
     "seed:catalog": "node scripts/seed-catalog.js",
     "seed:catalog:clean": "node scripts/seed-catalog.js --cleanup"

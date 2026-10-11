@@ -1,0 +1,60 @@
+name: ShopVioMall production monitor
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: shopviomall-production-monitor
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  monitor:
+    # Keep the schedule dormant until the owner has configured credentials,
+    # external access, and reviewed Actions billing/quotas.
+    if: github.event_name == 'workflow_dispatch' || vars.MONITOR_ENABLE_SCHEDULE == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    env:
+      MONITOR_ALERT_TO: ${{ vars.MONITOR_ALERT_TO }}
+      RESEND_FROM_EMAIL: ${{ vars.RESEND_FROM_EMAIL }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      MONITOR_SSH_TARGET: ${{ vars.MONITOR_SSH_TARGET }}
+      MONITOR_SSH_PRIVATE_KEY: ${{ secrets.MONITOR_SSH_PRIVATE_KEY }}
+      MONITOR_SSH_KNOWN_HOSTS: ${{ vars.MONITOR_SSH_KNOWN_HOSTS }}
+      MONITOR_STOREFRONT_URL: ${{ vars.MONITOR_STOREFRONT_URL }}
+      MONITOR_STATE_FILE: ${{ runner.temp }}/shopviomall-monitor-state.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/shopviomall-monitor-state.json
+          key: shopviomall-monitor-${{ github.run_id }}
+          restore-keys: shopviomall-monitor-
+      - name: Validate monitoring configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in MONITOR_ALERT_TO RESEND_FROM_EMAIL RESEND_API_KEY MONITOR_SSH_TARGET MONITOR_SSH_PRIVATE_KEY MONITOR_SSH_KNOWN_HOSTS MONITOR_STOREFRONT_URL; do
+            if [[ -z "${!name:-}" ]]; then echo "Required GitHub variable/secret is missing: $name" >&2; exit 2; fi
+          done
+      - name: Run read-only production checks
+        id: monitor
+        continue-on-error: true
+        run: node scripts/monitor-production.js --json --state-file="${{ runner.temp }}/shopviomall-monitor-state.json"
+      - name: Save alert state for the next interval
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/shopviomall-monitor-state.json
+          key: shopviomall-monitor-${{ github.run_id }}
+      - name: Mark unhealthy check as failed
+        if: steps.monitor.outcome == 'failure'
+        run: exit 1
