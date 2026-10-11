@@ -33,7 +33,7 @@ jobs:
       MONITOR_SSH_PRIVATE_KEY: ${{ secrets.MONITOR_SSH_PRIVATE_KEY }}
       MONITOR_SSH_KNOWN_HOSTS: ${{ vars.MONITOR_SSH_KNOWN_HOSTS }}
       MONITOR_STOREFRONT_URL: ${{ vars.MONITOR_STOREFRONT_URL }}
-      MONITOR_STATE_FILE: ${{ runner.temp }}/shopviomall-monitor-state.json
+      MONITOR_STATE_FILE: ${{ github.workspace }}/.local-data/production-monitor-state.json
       MONITOR_SEND_TEST_EMAIL: ${{ inputs.send_test_email }}
     steps:
       - uses: actions/checkout@v4
@@ -42,7 +42,7 @@ jobs:
           node-version: 22
       - uses: actions/cache/restore@v4
         with:
-          path: ${{ runner.temp }}/shopviomall-monitor-state.json
+          path: ${{ github.workspace }}/.local-data/production-monitor-state.json
           key: shopviomall-monitor-${{ github.run_id }}
           restore-keys: shopviomall-monitor-
       - name: Validate monitoring configuration
@@ -64,7 +64,7 @@ jobs:
         if: always() && inputs.send_test_email != true
         uses: actions/cache/save@v4
         with:
-          path: ${{ runner.temp }}/shopviomall-monitor-state.json
+          path: ${{ github.workspace }}/.local-data/production-monitor-state.json
           key: shopviomall-monitor-${{ github.run_id }}
       - name: Mark unhealthy check as failed
         if: steps.monitor.outcome == 'failure'
