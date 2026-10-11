@@ -4,6 +4,12 @@ on:
   schedule:
     - cron: "*/5 * * * *"
   workflow_dispatch:
+    inputs:
+      send_test_email:
+        description: "Send one clearly labeled monitoring delivery test to the configured alert recipient"
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: shopviomall-production-monitor
@@ -28,6 +34,7 @@ jobs:
       MONITOR_SSH_KNOWN_HOSTS: ${{ vars.MONITOR_SSH_KNOWN_HOSTS }}
       MONITOR_STOREFRONT_URL: ${{ vars.MONITOR_STOREFRONT_URL }}
       MONITOR_STATE_FILE: ${{ runner.temp }}/shopviomall-monitor-state.json
+      MONITOR_SEND_TEST_EMAIL: ${{ inputs.send_test_email }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -48,9 +55,13 @@ jobs:
       - name: Run read-only production checks
         id: monitor
         continue-on-error: true
-        run: node scripts/monitor-production.js --json --state-file="${{ runner.temp }}/shopviomall-monitor-state.json"
+        shell: bash
+        run: |
+          args=(--json --state-file="$MONITOR_STATE_FILE")
+          if [[ "${MONITOR_SEND_TEST_EMAIL:-false}" == "true" ]]; then args+=(--test-email); fi
+          node scripts/monitor-production.js "${args[@]}"
       - name: Save alert state for the next interval
-        if: always()
+        if: always() && inputs.send_test_email != true
         uses: actions/cache/save@v4
         with:
           path: ${{ runner.temp }}/shopviomall-monitor-state.json
@@ -58,3 +69,4 @@ jobs:
       - name: Mark unhealthy check as failed
         if: steps.monitor.outcome == 'failure'
         run: exit 1
+

@@ -61,6 +61,7 @@ function createConfig(env = process.env, args = []) {
     sshKnownHosts: env.MONITOR_SSH_KNOWN_HOSTS || "",
     stateFile: env.MONITOR_STATE_FILE || path.join(process.cwd(), ".local-data", "production-monitor-state.json"),
     noAlerts: args.includes("--no-alerts"),
+    testEmail: args.includes("--test-email"),
     skipServer: args.includes("--skip-server"),
     jsonOnly: args.includes("--json"),
   };
@@ -72,6 +73,7 @@ function createConfig(env = process.env, args = []) {
     throw new Error("The storefront monitor URL must use /shop/{public-shop-slug}.");
   }
   config.storefrontUrl = store.href;
+  if (config.testEmail && config.noAlerts) throw new Error("--test-email cannot be combined with --no-alerts.");
   if (config.sshTarget && !/^[A-Za-z0-9._-]+@[A-Za-z0-9.-]+$/.test(config.sshTarget)) {
     throw new Error("MONITOR_SSH_TARGET must be a simple user@host value.");
   }
@@ -401,6 +403,26 @@ function recordNotificationFailure(nextState, previousState, error, at = new Dat
   };
 }
 
+function monitoringTestEmailDecision(snapshot) {
+  return {
+    subject: "[TEST] ShopVioMall monitoring email delivery",
+    body: [
+      "This is a monitoring delivery test only. It is not an outage alert and does not indicate a production incident.",
+      `Check completed: ${snapshot.checkedAt}`,
+      `Monitor result: ${snapshot.status}`,
+      "No incident notification state was changed by this test.",
+    ].join("\n\n"),
+  };
+}
+
+async function sendMonitoringTestEmail(config, snapshot, send = sendResendAlert) {
+  if (config.alertTo?.trim().toLowerCase() !== "sevenx729@gmail.com") {
+    throw new Error("Monitoring test email recipient must be the owner-approved test address.");
+  }
+  const receipt = await send(config, monitoringTestEmailDecision(snapshot));
+  return { sent: true, accepted: receipt?.ok === true, status: receipt?.status ?? null, event: "test" };
+}
+
 async function sendResendAlert(config, decision, fetchImpl = fetch) {
   if (!config.alertTo || !config.alertFrom || !config.resendApiKey) throw new Error("Email alert configuration is incomplete.");
   if (!/^[^\s@,]+@[^\s@,]+\.[^\s@,]+$/.test(config.alertTo) || config.alertTo.length > 254) throw new Error("Monitoring alert recipient is not a valid email address.");
@@ -448,6 +470,22 @@ async function main() {
       registration: { ok: false, error: "RDAP check did not complete." },
       server: { configured: Boolean(config.sshTarget), ok: false, error: "VPS check did not complete." },
     };
+  }
+  if (config.testEmail) {
+    let notification = { sent: false, event: "test" };
+    try {
+      notification = await sendMonitoringTestEmail(config, snapshot);
+    } catch (error) {
+      notification.error = oneLineError(error);
+      snapshot.critical.push(`Test email delivery failed: ${notification.error}`);
+      snapshot.ok = false;
+      snapshot.status = "critical";
+    }
+    const output = { ...snapshot, notification, testEmail: true };
+    if (config.jsonOnly) process.stdout.write(`${JSON.stringify(output)}\n`);
+    else process.stdout.write(`ShopVioMall monitoring test email: ${notification.sent ? "sent" : "failed"}; incident state unchanged.\n`);
+    if (!snapshot.ok || (!config.skipServer && !snapshot.server.configured)) process.exitCode = 1;
+    return;
   }
   const previousState = await loadState(config.stateFile);
   let state = previousState;
@@ -503,6 +541,9 @@ module.exports = {
   createConfig,
   assessServerReport,
   recordNotificationFailure,
+  monitoringTestEmailDecision,
+  sendMonitoringTestEmail,
   runReadOnlyServerCheck,
   sendResendAlert,
 };
+

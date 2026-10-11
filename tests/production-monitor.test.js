@@ -12,6 +12,8 @@ const {
   collectSnapshot,
   createConfig,
   recordNotificationFailure,
+  monitoringTestEmailDecision,
+  sendMonitoringTestEmail,
   sendResendAlert,
 } = require("../scripts/monitor-production");
 
@@ -108,6 +110,31 @@ test("monitor email refuses unapproved sender identities", async () => {
   }), /verified ShopVioMall support sender identity/);
 });
 
+test("manual monitoring email test requires an explicit flag and cannot disable its own send", () => {
+  assert.equal(createConfig({}, []).testEmail, false);
+  assert.equal(createConfig({}, ["--test-email"]).testEmail, true);
+  assert.throws(() => createConfig({}, ["--test-email", "--no-alerts"]), /cannot be combined/);
+});
+
+test("test email is clearly labeled, sent once, and reports Resend acceptance", async () => {
+  const snapshot = { checkedAt: "2026-10-11T00:00:00.000Z", status: "healthy" };
+  const decision = monitoringTestEmailDecision(snapshot);
+  assert.match(decision.subject, /^\[TEST\]/);
+  assert.match(decision.body, /not an outage alert/i);
+  assert.match(decision.body, /does not indicate a production incident/i);
+  let calls = 0;
+  const result = await sendMonitoringTestEmail({ alertTo: "sevenx729@gmail.com" }, snapshot, async (_config, received) => {
+    calls += 1;
+    assert.equal(received.subject, decision.subject);
+    return { ok: true, status: 200 };
+  });
+  assert.equal(calls, 1);
+  assert.deepEqual(result, { sent: true, accepted: true, status: 200, event: "test" });
+  await assert.rejects(sendMonitoringTestEmail({ alertTo: "wrong-recipient@example.net" }, snapshot, async () => {
+    throw new Error("must not send to an unapproved recipient");
+  }), /owner-approved test address/);
+});
+
 test("failed alert delivery does not mark an incident as notified and remains retryable", () => {
   const previous = { pendingSignature: "CRITICAL: outage", pendingCount: 1, lastNotifiedSignature: "" };
   const proposed = { pendingSignature: "CRITICAL: outage", pendingCount: 2, lastNotifiedSignature: "CRITICAL: outage" };
@@ -159,3 +186,4 @@ test("snapshot raises latency warnings and critical alerts using configured resp
   assert.ok(snapshot.critical.some((item) => /apiHealth response time/.test(item)));
   assert.equal(snapshot.status, "critical");
 });
+
